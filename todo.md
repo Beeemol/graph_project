@@ -6,8 +6,8 @@ In progress:
 
 Traitement de parcours: Abdu
 représentation des mondes: -monde de base
-                           -fonctions de modification     --> Allan
-Algorithmes de parcours
+                           -fonctions de modification     --> Allan + Kenzo
+Algorithmes de parcours: Robin
 
 
 
