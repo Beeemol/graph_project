@@ -126,24 +126,21 @@ def main():
     colors = create_trash(4,7,8,colors)
 
     trash_pos=list_trash_pos(colors)
-    print(trash_pos)
 
     shortest_path = []
     shortest_path_cost = []
 
-    start = 28
-    end = trash_pos[0]
+    start = 0
+    end = 28
 
-    for i in range(1, len(trash_pos), 1):
-        print("start:", start)
-        print("end:", end)
-        shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
-        shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
+    for i in range(0, len(trash_pos), 1):
         start = end
         end = trash_pos[i]
+        shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
+        shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
 
-    print(shortest_path)
-    print(shortest_path_cost)
+    print("chemin le plus court entre les déchets:", shortest_path)
+    print("cout de chaque chemin:", shortest_path_cost)
 
 if __name__ == "__main__":
     main()
