@@ -62,6 +62,7 @@ fin """
 
 import networkx as nx
 import heapq
+from graphs import *
 
 def create_graph(N):
     G = nx.MultiGraph()
@@ -73,6 +74,13 @@ def create_graph(N):
         if (j / N <= N - 1):
             G.add_edge(j, j + N, weight=1)
     return G
+
+def list_trash_pos(colors):
+    pos = []
+    for i in range(0, len(colors), 1):
+        if colors[i] == 'yellow':
+            pos.append(i+1)
+    return pos
 
 def dijkstra_shortest_path(G, start_node, end_node):
 
@@ -109,8 +117,31 @@ def dijkstra_shortest_path(G, start_node, end_node):
 def main():
     N=8
     graphe = create_graph(N)
+    colors = create_color(8)
+    graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, 8, colors)
+    colors = create_robot(4, 4, 8, colors)
+    colors = create_trash(5,6,8,colors)
+    colors = create_trash(1,1,8,colors)
+    colors = create_trash(5,5,8,colors)
+    colors = create_trash(4,7,8,colors)
 
-    shortest_path_cost, shortest_path = dijkstra_shortest_path(graphe, 1, N*N)
+    trash_pos=list_trash_pos(colors)
+    print(trash_pos)
+
+    shortest_path = []
+    shortest_path_cost = []
+
+    start = 28
+    end = trash_pos[0]
+
+    for i in range(1, len(trash_pos), 1):
+        print("start:", start)
+        print("end:", end)
+        shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
+        shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
+        start = end
+        end = trash_pos[i]
+
     print(shortest_path)
     print(shortest_path_cost)
 
