@@ -55,32 +55,12 @@ début
     retourner(d,parent)
 fin """
 
-# Idée: on a le tableau des pos des déchets, et la position initiale du robot.
-# On boucle dijsktra entre la position i et la position i+1 de ces coordonnées
-# On retourne les chemins obtenus
-
-
 import networkx as nx
 import heapq
 from graphs import *
 
 
-
-#Créé un graphe pondéré de taille N. Toutes les arretes ont un poids de 1
-def create_graph(N):
-    G = nx.MultiGraph()
-    for i in range(1, N * N):
-        G.add_node(i)
-    for j in range(1, N * N):
-        if ((j-1) // N == (j) // N):
-            G.add_edge(j, j + 1, weight=1)
-        if (j / N <= N - 1):
-            G.add_edge(j, j + N, weight=1)
-    return G
-
-
-
-#Retourne la liste des positions des déchets sur le graphe
+""" Retourne la liste des positions des déchets sur le graphe """
 def list_trash_pos(colors):
     pos = []
     for i in range(0, len(colors), 1):
@@ -89,9 +69,14 @@ def list_trash_pos(colors):
     return pos
 
 
+""" Donne la position du robot dans le graphe """
+def robot_pos(colors):
+    for i in range(0, len(colors), 1):
+        if colors[i] == 'red':
+            return i+1
 
-#Parcours le graphe G depuis un sommet start_node vers un sommet end_node en 
-#cherchant le chemin plus court selon l'algorithme de Dijkstra
+""" Parcours le graphe G depuis un sommet start_node vers un sommet end_node en 
+cherchant le chemin plus court selon l'algorithme de Dijkstra """
 def dijkstra_shortest_path(G, start_node, end_node):
 
     visited = {start_node: 0}
@@ -102,7 +87,7 @@ def dijkstra_shortest_path(G, start_node, end_node):
         (dist, current_node) = heapq.heappop(heap)
 
         if current_node == end_node:
-            # Retourne le chemin le plus court et sa distance
+            """ Retourne le chemin le plus court et sa distance """
             shortest_path = []
             while current_node in path:
                 shortest_path.append(current_node)
@@ -121,19 +106,37 @@ def dijkstra_shortest_path(G, start_node, end_node):
                 heapq.heappush(heap, (tentative_distance, neighbor))
                 path[neighbor] = current_node
 
-    # Retourne None si aucun chemin n'a été trouvé
+    """ Retourne None si aucun chemin n'a été trouvé """
     return None
 
+""" Retourne la somme des éléments d'un tableau donné en paramètre """
+def sum(array):
+    sum = 0
+    for i in array:
+        sum+=i
+    return sum
+
 def main():
-    N=8
+
+    """ Création d'un graphe de taille N """
+    N=20
     graphe = create_graph(N)
-    colors = create_color(8)
-    graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, 8, colors)
-    colors = create_robot(4, 4, 8, colors)
-    colors = create_trash(5,6,8,colors)
-    colors = create_trash(1,1,8,colors)
-    colors = create_trash(5,5,8,colors)
-    colors = create_trash(4,7,8,colors)
+    colors = create_color(N)
+    graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, N, colors)
+    colors = create_robot(4, 4, N, colors)
+    colors = create_trash(5,6,N,colors)
+    colors = create_trash(1,1,N,colors)
+    colors = create_trash(5,5,N,colors)
+    colors = create_trash(4,7,N,colors)
+
+    """ Créé une liste de position associée a chaque sommet : utile 
+    pour l'affichage du grpahe seulement """
+    pos_fix = create_pos(graphe, N)
+    
+    """ Affichage du graphe """
+    nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
+    labels = nx.get_edge_attributes(graphe, 1)
+    plt.show()
 
     trash_pos=list_trash_pos(colors)
 
@@ -141,16 +144,25 @@ def main():
     shortest_path_cost = []
 
     start = 0
-    end = 57
+    end = robot_pos(colors)
 
+    tmp=0
+
+    """ Recherche du plus court chemin """
     for i in range(0, len(trash_pos), 1):
         start = end
         end = trash_pos[i]
+        if(dijkstra_shortest_path(graphe, start, end) == None):
+            print("ERROR: Chemin inexistant. Veuillez vérifier votre graphe et le corriger.")
+            tmp=1
+            break
         shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
         shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
 
-    print("chemin le plus court entre les déchets:", shortest_path)
-    print("cout de chaque chemin:", shortest_path_cost)
+    if(tmp==0):
+        print("chemin le plus court entre les déchets:", shortest_path)
+        print("cout de chaque chemin:", shortest_path_cost)
+        print("cout total:", sum(shortest_path_cost))
 
 if __name__ == "__main__":
     main()
