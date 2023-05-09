@@ -6,12 +6,12 @@ import networkx as nx
 from read import parse_elements_file
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print( "Veuillez donner le chemin d'un fichier en arguments du programme")
+    if len(sys.argv) != 3:
+        print( "Veuillez donner la taille du carré puis le chemin d'un fichier en arguments du programme")
         exit(1)
-        
-        
-    elements = parse_elements_file(sys.argv[1])
+
+    size = sys.argv[1]
+    elements = parse_elements_file(sys.argv[2],size)
     print(elements)
 
 def create_graph(N):
@@ -20,9 +20,9 @@ def create_graph(N):
     G.add_node(i)
   for j in range(1, N * N):
     if ((j-1) // N == (j) // N):
-      G.add_edge(j, j + 1)
+      G.add_edge(j, j + 1, weight=1)
     if (j / N <= N - 1):
-      G.add_edge(j, j + N)
+      G.add_edge(j, j + N, weight=1)
   return G
 
 def create_color(N):
