@@ -18,7 +18,7 @@ class Element:
             coords += f" ;({self.end_x},{self.end_y})"
         return f"Element(name='{self.name}', coords={coords})"
 
-def parse_elements_file(file_path):
+def parse_elements_file(file_path,N):
     elements = []
 
     with open(file_path, 'r') as file:
@@ -27,7 +27,6 @@ def parse_elements_file(file_path):
             if len(parts) == 2:
                 name = parts[0].strip()
                 raw_coordinates = parts[1].strip().split(';')
-                print(raw_coordinates)
                 try:
                     coordinates = []
                     for coord in raw_coordinates:
@@ -46,13 +45,13 @@ def parse_elements_file(file_path):
                     print( "Veuillez donner la taille du carré puis le chemin d'un fichier valide en arguments du programme")
                     pass
 
-    return elements
+    return N,elements
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print( "Veuillez donner la taille du carré puis le chemin d'un fichier en arguments du programme")
         exit(1)
-        
-        
-    elements = parse_elements_file(sys.argv[1])
+
+    size = sys.argv[1]
+    elements = parse_elements_file(sys.argv[2],size)
     print(elements)

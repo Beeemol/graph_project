@@ -66,7 +66,38 @@ def random_trash(N, K, color):
       color = create_trash(r1,r2,N,color)
       i = i + 1
   return color
-    
+def random_obstacle(G, N, K, color):
+  i = 0
+  while(i != K):
+    r1 = random.randint(1, N)
+    r2 = random.randint(1, N)
+    r3 = random.randint(1, N)
+    r4 = random.randint(1, N)
+    if(r1-r2 > 0):
+      a = r1
+      r1 = r2
+      r2 = a
+    if(r3-r4 > 0):
+      b = r3
+      r3 = r4
+      r4 = b
+    if(r1 <= N//2 and r2 >= N//2 and r3 <= N//2 and r4 >= N//2):
+      i = i
+    else:
+      G, color = create_obstacle(G, r1, r2, r3, r4, N, color)
+      i = i + 1
+  return color
+
+def initialize_world_random(N, K1, K2):
+  graph = create_graph(N)
+  pos_fix = create_pos(graph, N)
+  colors = create_color(N)
+  colors = create_robot(N//2, N//2, N, colors)
+  colors = random_obstacle(graph, N, K1, colors)
+  colors = random_trash(N, K2, colors)
+
+  nx.draw(graph, pos=pos_fix, with_labels=True, node_color=colors)
+  return graph
 
 
 def initialize_world(elements, N):
