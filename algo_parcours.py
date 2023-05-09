@@ -64,6 +64,9 @@ import networkx as nx
 import heapq
 from graphs import *
 
+
+
+#Créé un graphe pondéré de taille N. Toutes les arretes ont un poids de 1
 def create_graph(N):
     G = nx.MultiGraph()
     for i in range(1, N * N):
@@ -75,6 +78,9 @@ def create_graph(N):
             G.add_edge(j, j + N, weight=1)
     return G
 
+
+
+#Retourne la liste des positions des déchets sur le graphe
 def list_trash_pos(colors):
     pos = []
     for i in range(0, len(colors), 1):
@@ -82,6 +88,10 @@ def list_trash_pos(colors):
             pos.append(i+1)
     return pos
 
+
+
+#Parcours le graphe G depuis un sommet start_node vers un sommet end_node en 
+#cherchant le chemin plus court selon l'algorithme de Dijkstra
 def dijkstra_shortest_path(G, start_node, end_node):
 
     visited = {start_node: 0}
@@ -131,7 +141,7 @@ def main():
     shortest_path_cost = []
 
     start = 0
-    end = 28
+    end = 57
 
     for i in range(0, len(trash_pos), 1):
         start = end
