@@ -146,6 +146,8 @@ def main():
     start = 0
     end = robot_pos(colors)
 
+    """ Si tmp est différent de 0 après exécution, cela signifie qu'un
+    problème est survenu """
     tmp=0
 
     """ Recherche du plus court chemin """
