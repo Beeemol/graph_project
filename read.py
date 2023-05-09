@@ -24,33 +24,35 @@ def parse_elements_file(file_path):
     with open(file_path, 'r') as file:
         for line in file.readlines():
             parts = line.strip().split(':')
-
             if len(parts) == 2:
                 name = parts[0].strip()
                 raw_coordinates = parts[1].strip().split(';')
-
+                print(raw_coordinates)
                 try:
                     coordinates = []
                     for coord in raw_coordinates:
-                        coord = coord.strip('()').split(',')
-                        coordinates.append((int(coord[0].strip()), int(coord[1].strip())))
-
-                    if len(coordinates) == 1:
+                        if(len(raw_coordinates) == 1):
+                            coord = coord.strip('()').split(',')
+                            coordinates.append((int(coord[0].strip()), int(coord[1].strip())))
+                        if(len(raw_coordinates) == 2):
+                            coord = coord.strip().strip('()').split(',')
+                            coordinates.append((int(coord[0]), int(coord[1])))
+                            
+                    if( len(coordinates) == 1):
                         elements.append(Element(name, coordinates[0][0], coordinates[0][1]))
                     elif len(coordinates) == 2:
                         elements.append(Element(name, coordinates[0][0], coordinates[0][1], coordinates[1][0], coordinates[1][1]))
                 except ValueError:
+                    print( "Veuillez donner la taille du carré puis le chemin d'un fichier valide en arguments du programme")
                     pass
 
     return elements
 
-"""
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print( "Veuillez donner le chemin d'un fichier en arguments du programme")
+    if len(sys.argv) != 3:
+        print( "Veuillez donner la taille du carré puis le chemin d'un fichier en arguments du programme")
         exit(1)
         
         
     elements = parse_elements_file(sys.argv[1])
     print(elements)
-"""
