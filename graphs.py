@@ -1,7 +1,18 @@
 import numpy as np
+import sys
+import random
 import matplotlib.pyplot as plt
 import networkx as nx
+from read import parse_elements_file
 
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print( "Veuillez donner le chemin d'un fichier en arguments du programme")
+        exit(1)
+        
+        
+    elements = parse_elements_file(sys.argv[1])
+    print(elements)
 
 def create_graph(N):
   G = nx.MultiGraph()
@@ -46,16 +57,43 @@ def create_robot(X, Y, N, color):
 def create_trash(X, Y, N, color):
   color[(X-1)+N*(Y)-N] = 'yellow'
   return color
+def random_trash(N, K, color):
+  i = 0
+  while(i != K):
+    r1 = random.randint(1, N)
+    r2 = random.randint(1, N)
+    if(color[(r1-1) + N*r2-N] == 'blue'):
+      color = create_trash(r1,r2,N,color)
+      i = i + 1
+  return color
+    
 
-graphe = create_graph(8)
-pos_fix = create_pos(graphe, 8)
-colors = create_color(8)
-graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, 8, colors)
-colors = create_robot(4, 4, 8, colors)
-colors = create_trash(5,6,8,colors)
-colors = create_trash(1,1,8,colors)
-colors = create_trash(5,5,8,colors)
-colors = create_trash(4,7,8,colors)
-nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
-labels = nx.get_edge_attributes(graphe, 1)
+
+def initialize_world(elements, N):
+  graph = create_graph(N)
+  pos_fix = create_pos(graph, N)
+  colors = create_color(N)
+
+  for i in range (len(elements)):
+    if(elements[i].name == 'R'):
+      colors = create_robot(elements[i].start_x, elements[i].start_y, N, colors)
+    if(elements[i].name == 'X'):
+      graph, colors = create_obstacle(graph, elements[i].start_x, elements[i].end_x, elements[i].start_y, elements[i].end_y, N, colors)
+    if(elements[i].name.isdigit()):
+      colors = create_trash(elements[i].start_x, elements[i].start_y, N, colors)
+
+  nx.draw(graph, pos=pos_fix, with_labels=True, node_color=colors)
+  return graph
+
+def initialize_world_random_no_obstacle(N, K):
+  graph = create_graph(N)
+  pos_fix = create_pos(graph, N)
+  colors = create_color(N)
+  colors = create_robot(N//2, N//2, N, colors)
+  colors = random_trash(N, K, colors) 
+
+  nx.draw(graph, pos=pos_fix, with_labels=True, node_color=colors)
+  return graph
+
+initialize_world_random_no_obstacle(20, 4)
 plt.show()
