@@ -178,7 +178,8 @@ def calculate_time_from_dir(dir_start, dir_next):
     return None
 
 
-""" calcule le nombre de rotation faites par le robot pour parcourir le parcours donné en paramètre"""
+""" Calcule le nombre de rotation faites par le robot pour parcourir
+le parcours donné en paramètre"""
 def time(path, N):
 
     T=0
@@ -193,6 +194,7 @@ def time(path, N):
 
 
 
+""" Calcul du plus court chemin suivant un ordre de position fourni """
 def find_path(graphe, trash_pos, colors):
 
     shortest_path = []
@@ -218,8 +220,8 @@ def find_path(graphe, trash_pos, colors):
 
 
 
-
-
+""" Calcul du plus court chemin en testant tous les chemins possibles entre 
+tous les arrangements possibles des position des déchets """
 def find_best_path(graphe, trash_pos, N, colors):
 
     shortest_path, shortest_path_cost = find_path(graphe, trash_pos, colors)
@@ -249,13 +251,16 @@ def main(v_robot, v_angulaire):
 
     N=20   
 
+    """ Initialisation du graph et des données """
     graphe, pos_fix, colors = initialize_world_random_no_obstacle(N, 4)
 
-
+    """ Obtention de la liste des positions des déchets """
     trash_pos=list_trash_pos(colors)
 
+    """ Determination du plus court chemin et du temps de parcours """
     shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors)
 
+    """ Calcul du temps de parcours en fonction de la vitesse angulaire """
     time_spend = time_spend*v_angulaire
 
     print("chemin le plus court entre les déchets:", shortest_path)
