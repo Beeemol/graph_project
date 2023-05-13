@@ -60,7 +60,7 @@ import numpy as np
 import heapq
 from graphs import *
 from enum import Enum
-
+from itertools import combinations
 
 class DIR(Enum):
     NORTH=0
@@ -125,7 +125,7 @@ def sum(array):
         sum+=i
     return sum
 
-#Retourne la direction entre deux positions
+""" Retourne la direction entre deux positions """
 def get_dir(x,y,N):
     if y==x+1:
         return DIR.EAST
@@ -137,7 +137,7 @@ def get_dir(x,y,N):
         return DIR.SOUTH
     return None
 
-#Calcule le nombre de rotation d'une direction à une autre
+""" Calcule le nombre de rotation d'une direction à une autre """
 def calculate_time_from_dir(dir_start, dir_next):
     if dir_start==DIR.NORTH:
         if dir_next==DIR.NORTH:
@@ -178,7 +178,7 @@ def calculate_time_from_dir(dir_start, dir_next):
     return None
 
 
-#calcule le nombre de rotation faites par le robot pour parcourir le parcours donné en paramètre
+""" calcule le nombre de rotation faites par le robot pour parcourir le parcours donné en paramètre"""
 def time(path, N):
 
     T=0
@@ -192,32 +192,8 @@ def time(path, N):
     return T
 
 
-#crée un graphe, applique dijkstra, calcule le temps de parcours
-def main(v_angulaire):
 
-    """ Création d'un graphe de taille N """
-    N=20
-    # graphe = create_graph(N)
-    # colors = create_color(N)
-    # graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, N, colors)
-    # colors = create_robot(4, 4, N, colors)
-    # colors = create_trash(5,6,N,colors)
-    # colors = create_trash(1,1,N,colors)
-    # colors = create_trash(5,5,N,colors)
-    # colors = create_trash(4,7,N,colors)
-
-    """ Créé une liste de position associée a chaque sommet : utile 
-    pour l'affichage du grpahe seulement """
-    # pos_fix = create_pos(graphe, N)
-    
-    graphe, pos_fix, colors = initialize_world_random_no_obstacle(N, 4)
-
-    """ Affichage du graphe """
-    # nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
-    # labels = nx.get_edge_attributes(graphe, 1)
-    plt.show()
-
-    trash_pos=list_trash_pos(colors)
+def find_path(graphe, trash_pos, colors):
 
     shortest_path = []
     shortest_path_cost = []
@@ -225,18 +201,11 @@ def main(v_angulaire):
     start = 0
     end = robot_pos(colors)
 
-    """ Si tmp est différent de 0 après exécution, cela signifie qu'un
-    problème est survenu """
-    tmp=0
-
     """ Recherche du plus court chemin """
     for i in range(0, len(trash_pos), 1):
         start = end
         end = trash_pos[i]
-        if(dijkstra_shortest_path(graphe, start, end) == None):
-            print("ERROR: Chemin inexistant. Veuillez vérifier votre graphe et le corriger.")
-            tmp=1
-            break
+
         shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
         shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
     
@@ -244,14 +213,51 @@ def main(v_angulaire):
     end = robot_pos(colors)
     shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
     shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
-    
-    time_spend = time(shortest_path, N) * v_angulaire
-    
-    if(tmp==0):
-        print("chemin le plus court entre les déchets:", shortest_path)
-        print("cout de chaque chemin:", shortest_path_cost)
-        print("cout total:", sum(shortest_path_cost))
-        print("temps de parcours:", time_spend, "s")
+
+    return shortest_path, shortest_path_cost
+
+def find_best_path(graphe, trash_pos, N, colors):
+
+    shortest_path, shortest_path_cost = find_path(graphe, trash_pos, colors)
+    shortest_time = time(shortest_path, N)
+
+    for n in combinations(trash_pos, len(trash_pos)):
+
+        tmp_path, tmp_cost = find_path(graphe, n, colors)
+        tmp_time = time(tmp_path, N)
+
+        if shortest_time>tmp_time:
+            shortest_path = tmp_path
+            shortest_path_cost = tmp_cost
+            shortest_time = tmp_time
+
+    return shortest_path, shortest_path_cost, shortest_time
+
+
+
+
+
+
+""" crée un graphe, applique dijkstra, calcule le temps de parcours """
+def main(v_angulaire):
+
+    N=20   
+
+    graphe, pos_fix, colors = initialize_world_random_no_obstacle(N, 4)
+
+
+    trash_pos=list_trash_pos(colors)
+
+    shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors)
+
+
+    print("chemin le plus court entre les déchets:", shortest_path)
+    print("cout de chaque chemin:", shortest_path_cost)
+    print("cout total:", sum(shortest_path_cost))
+    print("temps de parcours:", time_spend, "s")
+
+    plt.show()
+
 
 
 
