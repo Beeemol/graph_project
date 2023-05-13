@@ -239,7 +239,7 @@ def find_best_path(graphe, trash_pos, N, colors):
 
 
 """ crée un graphe, applique dijkstra, calcule le temps de parcours """
-def main(v_angulaire):
+def main(v_robot, v_angulaire):
 
     N=20   
 
@@ -250,11 +250,13 @@ def main(v_angulaire):
 
     shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors)
 
+    time_spend = time_spend*v_angulaire
 
     print("chemin le plus court entre les déchets:", shortest_path)
     print("cout de chaque chemin:", shortest_path_cost)
     print("cout total:", sum(shortest_path_cost))
-    print("temps de parcours:", time_spend, "s")
+    print("temps de rotation:", time_spend, "s")
+    print("temps total :", time_spend + sum(shortest_path_cost)*v_robot, "s")
 
     plt.show()
 
@@ -262,5 +264,11 @@ def main(v_angulaire):
 
 
 if __name__ == "__main__":
-    v_angulaire = int(sys.argv[1])
-    main(v_angulaire)
+    if len(sys.argv)<3:
+        print("Veuillez préciser d'abord la vitesse du robot puis la vitesse angulaire du robot.")
+        exit(1)
+
+    v_robot = int(sys.argv[1])
+    v_angulaire = int(sys.argv[2])
+
+    main(v_robot, v_angulaire)
