@@ -56,8 +56,17 @@ début
 fin """
 
 import networkx as nx
+import numpy as np
 import heapq
 from graphs import *
+from enum import Enum
+
+
+class DIR(Enum):
+    NORTH=0
+    EAST=1
+    SOUTH=2
+    WEST=3
 
 
 """ Retourne la liste des positions des déchets sur le graphe """
@@ -116,7 +125,78 @@ def sum(array):
         sum+=i
     return sum
 
-def main():
+def get_dir(x,y,N):
+    if y==x+1:
+        return DIR.EAST
+    if y==x-1:
+        return DIR.WEST
+    if y==x-N:
+        return DIR.NORTH
+    if y==x+N:
+        return DIR.SOUTH
+    return None
+
+def calculate_time_from_dir(dir_start, dir_next):
+    if dir_start==DIR.NORTH:
+        if dir_next==DIR.NORTH:
+            return 0
+        if dir_next==DIR.EAST:
+            return 1
+        if dir_next==DIR.WEST:
+            return 1
+        if dir_next==DIR.SOUTH:
+            return 2
+    if dir_start==DIR.EAST:
+        if dir_next==DIR.NORTH:
+            return 1
+        if dir_next==DIR.EAST:
+            return 0
+        if dir_next==DIR.WEST:
+            return 2
+        if dir_next==DIR.SOUTH:
+            return 1
+    if dir_start==DIR.SOUTH:
+        if dir_next==DIR.NORTH:
+            return 2
+        if dir_next==DIR.EAST:
+            return 1
+        if dir_next==DIR.WEST:
+            return 1
+        if dir_next==DIR.SOUTH:
+            return 0
+    if dir_start==DIR.WEST:
+        if dir_next==DIR.NORTH:
+            return 1
+        if dir_next==DIR.EAST:
+            return 2
+        if dir_next==DIR.WEST:
+            return 0
+        if dir_next==DIR.SOUTH:
+            return 1
+    return None
+
+
+def time(path, N):
+
+    T=0
+    dir = DIR.NORTH
+    for i in range(len(path)):
+        # tmp_dir = get_dir(path[i-1], path[i], N)
+        # T+=calculate_time_from_dir(dir, tmp_dir)
+        # dir = tmp_dir
+        for j in range(1,len(path[i])):
+            tmp_dir = get_dir(path[i][j-1], path[i][j], N)
+            T+=calculate_time_from_dir(dir, tmp_dir)
+            dir = tmp_dir
+
+    return T
+
+
+
+
+
+
+def main(v_angulaire):
 
     """ Création d'un graphe de taille N """
     N=20
@@ -160,11 +240,20 @@ def main():
             break
         shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
         shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
-
+    
+    start = end
+    end = robot_pos(colors)
+    shortest_path_cost.append(dijkstra_shortest_path(graphe, start, end)[0])
+    shortest_path.append(dijkstra_shortest_path(graphe, start, end)[1])
+    
+    time_spend = time(shortest_path, N) * v_angulaire
+    
     if(tmp==0):
         print("chemin le plus court entre les déchets:", shortest_path)
         print("cout de chaque chemin:", shortest_path_cost)
         print("cout total:", sum(shortest_path_cost))
+        print("temps de parcours:", time_spend, "s")
 
 if __name__ == "__main__":
-    main()
+    v_angulaire = int(sys.argv[1])
+    main(v_angulaire)
