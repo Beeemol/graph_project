@@ -60,7 +60,7 @@ import numpy as np
 import heapq
 from graphs import *
 from enum import Enum
-from itertools import combinations
+from itertools import permutations
 
 class DIR(Enum):
     NORTH=0
@@ -216,12 +216,18 @@ def find_path(graphe, trash_pos, colors):
 
     return shortest_path, shortest_path_cost
 
+
+
+
+
 def find_best_path(graphe, trash_pos, N, colors):
 
     shortest_path, shortest_path_cost = find_path(graphe, trash_pos, colors)
     shortest_time = time(shortest_path, N)
 
-    for n in combinations(trash_pos, len(trash_pos)):
+    comb = list(permutations(trash_pos))
+
+    for n in comb:
 
         tmp_path, tmp_cost = find_path(graphe, n, colors)
         tmp_time = time(tmp_path, N)
