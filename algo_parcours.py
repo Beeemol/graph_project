@@ -403,7 +403,7 @@ def main(N, v_robot, v_angulaire):
     colors = color_path(colors, shortest_path)
     nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
     #UNCOMMENT TO SEE THE GRAPH
-    #plt.show()
+    plt.show()
 
     """ Clear """
     graphe.clear()
@@ -439,13 +439,13 @@ if __name__ == "__main__":
     v_angulaire = 1 / int(sys.argv[2])
 
     """ Taille du graphe """
-    N=15   
+    N=20   
     
-    #main(N, v_robot, v_angulaire)
-    #main(N, v_angulaire, v_robot)
+    main(N, v_robot, v_angulaire)
+    main(N, v_angulaire, v_robot)
     
     """calcul temps"""
-    time_graph(v_robot,v_angulaire)
+    # time_graph(v_robot,v_angulaire)
     
-    graph_dechets(N,v_robot, v_angulaire,7)
+    # graph_dechets(N,v_robot, v_angulaire,7)
 
