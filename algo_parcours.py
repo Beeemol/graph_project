@@ -299,8 +299,8 @@ if __name__ == "__main__":
         exit(1)
 
     """ Vitesses du robot """
-    v_robot = int(sys.argv[1])
-    v_angulaire = int(sys.argv[2])
+    v_robot = 1 / int(sys.argv[1])
+    v_angulaire = 1 / int(sys.argv[2])
 
     """ Taille du graphe """
     N=20   
