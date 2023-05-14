@@ -59,6 +59,7 @@ import networkx as nx
 import numpy as np
 import heapq
 from graphs import *
+from A import *
 from enum import Enum
 from itertools import permutations
 
@@ -195,7 +196,7 @@ def time(path, N, v_robot, v_angulaire):
 
 
 """ Calcul du plus court chemin suivant un ordre de position fourni """
-def find_path(graphe, trash_pos, colors):
+def find_path_dijkstra(graphe, trash_pos, colors):
 
     shortest_path = []
     shortest_path_cost = []
@@ -218,20 +219,65 @@ def find_path(graphe, trash_pos, colors):
 
     return shortest_path, shortest_path_cost
 
+""" Calcul du plus court chemin suivant un ordre de position fourni """
+def find_path_A(graphe, trash_pos, colors, N):
+
+    shortest_path = []
+    shortest_path_cost = []
+
+    start = 0
+    end = robot_pos(colors)
+
+    """ Recherche du plus court chemin """
+    for i in range(0, len(trash_pos), 1):
+        start = end
+        end = trash_pos[i]
+        shortest_path_cost.append(A(start, end, graphe, N)[0])
+        shortest_path.append(A(start, end, graphe, N)[1])
+    
+    start = end
+    end = robot_pos(colors)
+    shortest_path_cost.append(A(start, end, graphe, N)[0])
+    shortest_path.append(A(start, end, graphe, N)[1])
+
+    return shortest_path, shortest_path_cost
+
 
 
 """ Calcul du plus court chemin en testant tous les chemins possibles entre 
 tous les arrangements possibles des position des déchets """
-def find_best_path(graphe, trash_pos, N, colors, v_robot, v_angulaire):
+def find_best_path_dijkstra(graphe, trash_pos, N, colors, v_robot, v_angulaire):
 
-    shortest_path, shortest_path_cost = find_path(graphe, trash_pos, colors)
+    shortest_path, shortest_path_cost = find_path_dijkstra(graphe, trash_pos, colors)
     shortest_time = time(shortest_path, N, v_robot, v_angulaire)
 
     comb = list(permutations(trash_pos))
 
     for n in comb:
 
-        tmp_path, tmp_cost = find_path(graphe, n, colors)
+        tmp_path, tmp_cost = find_path_dijkstra(graphe, n, colors)
+        tmp_time = time(tmp_path, N, v_robot, v_angulaire)
+
+        if shortest_time>tmp_time:
+            shortest_path = tmp_path
+            shortest_path_cost = tmp_cost
+            shortest_time = tmp_time
+
+    return shortest_path, shortest_path_cost, shortest_time
+
+
+""" Calcul du plus court chemin en testant tous les chemins possibles entre 
+tous les arrangements possibles des position des déchets """
+def find_best_path_A(graphe, trash_pos, N, colors, v_robot, v_angulaire):
+
+    shortest_path, shortest_path_cost = find_path_A(graphe, trash_pos, colors,N)
+    shortest_time = time(shortest_path, N, v_robot, v_angulaire)
+
+    comb = list(permutations(trash_pos))
+
+    for n in comb:
+
+        tmp_path, tmp_cost = find_path_A(graphe, n, colors,N)
         tmp_time = time(tmp_path, N, v_robot, v_angulaire)
 
         if shortest_time>tmp_time:
@@ -256,7 +302,7 @@ def initialize_graph_for_example(N):
     pos_fix = create_pos(graphe, N)
     return graphe, colors, pos_fix
 
-""" crée un graphe, applique dijkstra, calcule le temps de parcours """
+""" crée un graphe, applique dijkstra/A, calcule le temps de parcours """
 def main(N, v_robot, v_angulaire):
 
     """ Initialisation du graph et des données """
@@ -268,7 +314,11 @@ def main(N, v_robot, v_angulaire):
     trash_pos=list_trash_pos(colors)
 
     """ Determination du plus court chemin et du temps de parcours """
-    shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors, v_robot, v_angulaire)
+    #uncomment to have the DIJKSTRA method
+    shortest_path, shortest_path_cost, time_spend = find_best_path_dijkstra(graphe, trash_pos, N, colors, v_robot, v_angulaire)
+
+    #uncomment to have the A method
+    #shortest_path, shortest_path_cost, time_spend = find_best_path_A(graphe, trash_pos, N, colors, v_robot, v_angulaire)
 
     """ Calcul du temps de parcours en fonction de la vitesse angulaire """
     time_spend = time_spend*v_angulaire
