@@ -57,6 +57,14 @@ def create_robot(X, Y, N, color):
 def create_trash(X, Y, N, color):
   color[(X-1)+N*(Y)-N] = 'yellow'
   return color
+
+def color_path(color, shortest_path):
+  for i in range(len(shortest_path)):
+    for j in range(len(shortest_path[i])):
+      if(color[shortest_path[i][j] - 1] == 'blue'):
+        color[shortest_path[i][j] - 1] = 'green'
+  return color
+
 def random_trash(N, K, color):
   i = 0
   while(i != K):
@@ -124,7 +132,7 @@ def initialize_world_random_no_obstacle(N, K):
   colors = random_trash(N, K, colors) 
 
   nx.draw(graph, pos=pos_fix, with_labels=True, node_color=colors)
-  return graph
+  return graph, pos_fix, colors
 
-initialize_world_random_no_obstacle(20, 4)
-plt.show()
+# graphe, pos_fix, colors = initialize_world_random_no_obstacle(20, 4)
+# plt.show()

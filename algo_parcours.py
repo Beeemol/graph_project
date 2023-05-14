@@ -138,56 +138,56 @@ def get_dir(x,y,N):
     return None
 
 """ Calcule le nombre de rotation d'une direction à une autre """
-def calculate_time_from_dir(dir_start, dir_next):
+def calculate_time_from_dir(dir_start, dir_next, v_robot, v_angulaire):
     if dir_start==DIR.NORTH:
         if dir_next==DIR.NORTH:
-            return 0
+            return v_robot
         if dir_next==DIR.EAST:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.WEST:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.SOUTH:
-            return 2
+            return 2*v_angulaire
     if dir_start==DIR.EAST:
         if dir_next==DIR.NORTH:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.EAST:
-            return 0
+            return v_robot
         if dir_next==DIR.WEST:
-            return 2
+            return 2*v_angulaire
         if dir_next==DIR.SOUTH:
-            return 1
+            return 1*v_angulaire
     if dir_start==DIR.SOUTH:
         if dir_next==DIR.NORTH:
-            return 2
+            return 2*v_angulaire
         if dir_next==DIR.EAST:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.WEST:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.SOUTH:
-            return 0
+            return v_robot
     if dir_start==DIR.WEST:
         if dir_next==DIR.NORTH:
-            return 1
+            return 1*v_angulaire
         if dir_next==DIR.EAST:
-            return 2
+            return 2*v_angulaire
         if dir_next==DIR.WEST:
-            return 0
+            return v_robot
         if dir_next==DIR.SOUTH:
-            return 1
+            return 1*v_angulaire
     return None
 
 
 """ Calcule le nombre de rotation faites par le robot pour parcourir
 le parcours donné en paramètre"""
-def time(path, N):
+def time(path, N, v_robot, v_angulaire):
 
     T=0
     dir = DIR.NORTH
     for i in range(len(path)):
         for j in range(1,len(path[i])):
             tmp_dir = get_dir(path[i][j-1], path[i][j], N)
-            T+=calculate_time_from_dir(dir, tmp_dir)
+            T+=calculate_time_from_dir(dir, tmp_dir, v_robot, v_angulaire)
             dir = tmp_dir
 
     return T
@@ -222,17 +222,17 @@ def find_path(graphe, trash_pos, colors):
 
 """ Calcul du plus court chemin en testant tous les chemins possibles entre 
 tous les arrangements possibles des position des déchets """
-def find_best_path(graphe, trash_pos, N, colors):
+def find_best_path(graphe, trash_pos, N, colors, v_robot, v_angulaire):
 
     shortest_path, shortest_path_cost = find_path(graphe, trash_pos, colors)
-    shortest_time = time(shortest_path, N)
+    shortest_time = time(shortest_path, N, v_robot, v_angulaire)
 
     comb = list(permutations(trash_pos))
 
     for n in comb:
 
         tmp_path, tmp_cost = find_path(graphe, n, colors)
-        tmp_time = time(tmp_path, N)
+        tmp_time = time(tmp_path, N, v_robot, v_angulaire)
 
         if shortest_time>tmp_time:
             shortest_path = tmp_path
@@ -244,42 +244,66 @@ def find_best_path(graphe, trash_pos, N, colors):
 
 
 
-
+def initialize_graph_for_example(N):
+    graphe = create_graph(N)
+    colors = create_color(N)
+    # graphe, colors = create_obstacle(graphe, 1, 3, 4, 7, N, colors)
+    colors = create_robot(10, 10, N, colors)
+    colors = create_trash(10,13,N,colors)
+    colors = create_trash(1,1,N,colors)
+    colors = create_trash(18,12,N,colors)
+    colors = create_trash(4,7,N,colors)
+    pos_fix = create_pos(graphe, N)
+    return graphe, colors, pos_fix
 
 """ crée un graphe, applique dijkstra, calcule le temps de parcours """
-def main(v_robot, v_angulaire):
-
-    N=20   
+def main(N, v_robot, v_angulaire):
 
     """ Initialisation du graph et des données """
-    graphe, pos_fix, colors = initialize_world_random_no_obstacle(N, 4)
+    # graphe, pos_fix, colors = initialize_world_random_no_obstacle(N, 4)
+    graphe, colors, pos_fix = initialize_graph_for_example(N)
+
 
     """ Obtention de la liste des positions des déchets """
     trash_pos=list_trash_pos(colors)
 
     """ Determination du plus court chemin et du temps de parcours """
-    shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors)
+    shortest_path, shortest_path_cost, time_spend = find_best_path(graphe, trash_pos, N, colors, v_robot, v_angulaire)
 
     """ Calcul du temps de parcours en fonction de la vitesse angulaire """
     time_spend = time_spend*v_angulaire
 
+    """ Affichage des données """
+    print("vitesse angulaire:", v_angulaire, "m/s")
+    print("vitesse du robot:", v_robot, "m/s")
     print("chemin le plus court entre les déchets:", shortest_path)
     print("cout de chaque chemin:", shortest_path_cost)
     print("cout total:", sum(shortest_path_cost))
     print("temps de rotation:", time_spend, "s")
     print("temps total :", time_spend + sum(shortest_path_cost)*v_robot, "s")
 
+    """ Affichage Graphe et chemin """
+    colors = color_path(colors, shortest_path)
+    nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
     plt.show()
 
-
+    """ Clear """
+    graphe.clear()
+    plt.cla()
+    plt.clf()
 
 
 if __name__ == "__main__":
     if len(sys.argv)<3:
-        print("Veuillez préciser d'abord la vitesse du robot puis la vitesse angulaire du robot.")
+        print("Veuillez préciser d'abord la vitesse linéaire du robot puis la vitesse angulaire du robot.")
         exit(1)
 
+    """ Vitesses du robot """
     v_robot = int(sys.argv[1])
     v_angulaire = int(sys.argv[2])
 
-    main(v_robot, v_angulaire)
+    """ Taille du graphe """
+    N=20   
+    
+    main(N, v_robot, v_angulaire)
+    main(N, v_angulaire, v_robot)
