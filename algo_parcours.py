@@ -62,6 +62,9 @@ from graphs import *
 from A import *
 from enum import Enum
 from itertools import permutations
+import time 
+import random 
+import matplotlib.pyplot as plt
 
 class DIR(Enum):
     NORTH=0
@@ -181,7 +184,7 @@ def calculate_time_from_dir(dir_start, dir_next, v_robot, v_angulaire):
 
 """ Calcule le nombre de rotation faites par le robot pour parcourir
 le parcours donné en paramètre"""
-def time(path, N, v_robot, v_angulaire):
+def calculate_time(path, N, v_robot, v_angulaire):
 
     T=0
     dir = DIR.NORTH
@@ -219,29 +222,29 @@ def find_path_dijkstra(graphe, trash_pos, colors):
 
     return shortest_path, shortest_path_cost
 
-""" Calcul du plus court chemin suivant un ordre de position fourni """
-def find_path_A(graphe, trash_pos, colors, N):
-
-    shortest_path = []
-    shortest_path_cost = []
-
-    start = 0
-    end = robot_pos(colors)
-
-    """ Recherche du plus court chemin """
-    for i in range(0, len(trash_pos), 1):
-        start = end
-        end = trash_pos[i]
-        shortest_path_cost.append(A(start, end, graphe, N)[0])
-        shortest_path.append(A(start, end, graphe, N)[1])
-    
-    start = end
-    end = robot_pos(colors)
-    shortest_path_cost.append(A(start, end, graphe, N)[0])
-    shortest_path.append(A(start, end, graphe, N)[1])
-
-    return shortest_path, shortest_path_cost
-
+#""" Calcul du plus court chemin suivant un ordre de position fourni """
+#def find_path_A(graphe, trash_pos, colors, N):
+#
+#    shortest_path = []
+#    shortest_path_cost = []
+#
+#    start = 0
+#    end = robot_pos(colors)
+#
+#    """ Recherche du plus court chemin """
+#    for i in range(0, len(trash_pos), 1):
+#        start = end
+#        end = trash_pos[i]
+#        shortest_path_cost.append(A(start, end, graphe, N)[0])
+#        shortest_path.append(A(start, end, graphe, N)[1])
+#    
+#    start = end
+#    end = robot_pos(colors)
+#    shortest_path_cost.append(A(start, end, graphe, N)[0])
+#    shortest_path.append(A(start, end, graphe, N)[1])
+#
+#    return shortest_path, shortest_path_cost
+#
 
 
 """ Calcul du plus court chemin en testant tous les chemins possibles entre 
@@ -249,14 +252,14 @@ tous les arrangements possibles des position des déchets """
 def find_best_path_dijkstra(graphe, trash_pos, N, colors, v_robot, v_angulaire):
 
     shortest_path, shortest_path_cost = find_path_dijkstra(graphe, trash_pos, colors)
-    shortest_time = time(shortest_path, N, v_robot, v_angulaire)
+    shortest_time = calculate_time(shortest_path, N, v_robot, v_angulaire)
 
     comb = list(permutations(trash_pos))
 
     for n in comb:
 
         tmp_path, tmp_cost = find_path_dijkstra(graphe, n, colors)
-        tmp_time = time(tmp_path, N, v_robot, v_angulaire)
+        tmp_time = calculate_time(tmp_path, N, v_robot, v_angulaire)
 
         if shortest_time>tmp_time:
             shortest_path = tmp_path
@@ -266,28 +269,91 @@ def find_best_path_dijkstra(graphe, trash_pos, N, colors, v_robot, v_angulaire):
     return shortest_path, shortest_path_cost, shortest_time
 
 
-""" Calcul du plus court chemin en testant tous les chemins possibles entre 
-tous les arrangements possibles des position des déchets """
-def find_best_path_A(graphe, trash_pos, N, colors, v_robot, v_angulaire):
+#""" Calcul du plus court chemin en testant tous les chemins possibles entre 
+#tous les arrangements possibles des position des déchets """
+#def find_best_path_A(graphe, trash_pos, N, colors, v_robot, v_angulaire):
+#
+#    shortest_path, shortest_path_cost = find_path_A(graphe, trash_pos, colors,N)
+#    shortest_time = calculate_time(shortest_path, N, v_robot, v_angulaire)
+#
+#    comb = list(permutations(trash_pos))
+#
+#    for n in comb:
+#
+#        tmp_path, tmp_cost = find_path_A(graphe, n, colors,N)
+#        tmp_time = calculate_time(tmp_path, N, v_robot, v_angulaire)
+#
+#        if shortest_time>tmp_time:
+#            shortest_path = tmp_path
+#            shortest_path_cost = tmp_cost
+#            shortest_time = tmp_time
+#
+#    return shortest_path, shortest_path_cost, shortest_time
 
-    shortest_path, shortest_path_cost = find_path_A(graphe, trash_pos, colors,N)
-    shortest_time = time(shortest_path, N, v_robot, v_angulaire)
-
-    comb = list(permutations(trash_pos))
-
-    for n in comb:
-
-        tmp_path, tmp_cost = find_path_A(graphe, n, colors,N)
-        tmp_time = time(tmp_path, N, v_robot, v_angulaire)
-
-        if shortest_time>tmp_time:
-            shortest_path = tmp_path
-            shortest_path_cost = tmp_cost
-            shortest_time = tmp_time
-
-    return shortest_path, shortest_path_cost, shortest_time
 
 
+""" crée un graphe, applique dijkstra/A, calcule le temps de parcours """
+def main_dechet(N, v_robot, v_angulaire, graphe, colors, pos_fix):
+
+    """ Obtention de la liste des positions des déchets """
+    trash_pos=list_trash_pos(colors)
+
+    """ Determination du plus court chemin et du temps de parcours """
+    #uncomment to have the DIJKSTRA method
+    shortest_path, shortest_path_cost, time_spend = find_best_path_dijkstra(graphe, trash_pos, N, colors, v_robot, v_angulaire)
+
+    #uncomment to have the A method
+    #shortest_path, shortest_path_cost, time_spend = find_best_path_A(graphe, trash_pos, N, colors, v_robot, v_angulaire)
+
+    """ Calcul du temps de parcours en fonction de la vitesse angulaire """
+    time_spend = time_spend*v_angulaire
+
+    """ Affichage des données """
+    print("vitesse angulaire:", v_angulaire, "m/s")
+    print("vitesse du robot:", v_robot, "m/s")
+    print("chemin le plus court entre les déchets:", shortest_path)
+    print("cout de chaque chemin:", shortest_path_cost)
+    print("cout total:", sum(shortest_path_cost))
+    print("temps de rotation:", time_spend, "s")
+    print("temps total :", time_spend + sum(shortest_path_cost)*v_robot, "s")
+
+    """ Affichage Graphe et chemin """
+    colors = color_path(colors, shortest_path)
+    nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
+    #UNCOMMENT TO SEE THE GRAPH
+    #plt.show()
+
+    """ Clear """
+    graphe.clear()
+    plt.cla()
+    plt.clf()
+
+def initialize_graph_random(N,a):
+    graphe = create_graph(N)
+    colors = create_color(N)
+    colors = create_robot(10, 10, N, colors)
+    for k in range(a):
+        colors = create_trash(random.randint(0, N-1),random.randint(0, N-1),N,colors)
+    pos_fix = create_pos(graphe, N)
+    return graphe, colors, pos_fix
+
+
+def graph_dechets(N,v_robot, v_angulaire,number):
+    dechets=[]
+    times=[]
+    for k in range(number):
+        dechets.append(k)
+        start_time = time.time()  # Démarrer le chrono
+        graphe, colors, pos_fix = initialize_graph_random(N,k)
+        main_dechet(N, v_robot, v_angulaire, graphe, colors, pos_fix)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        times.append(elapsed_time)
+    plt.plot(dechets, times)
+    plt.xlabel('nombre de déchet')
+    plt.ylabel('Temps (s)')
+    plt.title('Évolution du temps pris par le code en fonction du nombre de déchet')
+    plt.show()
 
 
 def initialize_graph_for_example(N):
@@ -301,6 +367,7 @@ def initialize_graph_for_example(N):
     colors = create_trash(4,7,N,colors)
     pos_fix = create_pos(graphe, N)
     return graphe, colors, pos_fix
+
 
 """ crée un graphe, applique dijkstra/A, calcule le temps de parcours """
 def main(N, v_robot, v_angulaire):
@@ -335,13 +402,32 @@ def main(N, v_robot, v_angulaire):
     """ Affichage Graphe et chemin """
     colors = color_path(colors, shortest_path)
     nx.draw(graphe, pos=pos_fix, with_labels=True, node_color=colors)
-    plt.show()
+    #UNCOMMENT TO SEE THE GRAPH
+    #plt.show()
 
     """ Clear """
     graphe.clear()
     plt.cla()
     plt.clf()
 
+
+def time_graph(v_robot,v_angulaire):
+    size=[]
+    times=[]
+
+    for taille in range(13, 25):
+        size.append(taille)
+        start_time = time.time()  # Démarrer le chrono
+        main(taille, v_robot, v_angulaire)
+        plt.close()
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        times.append(elapsed_time)
+    plt.plot(size, times)
+    plt.xlabel('Taille du monde')
+    plt.ylabel('Temps (s)')
+    plt.title('Évolution du temps pris par le code en fonction de la taille du monde')
+    plt.show()
 
 if __name__ == "__main__":
     if len(sys.argv)<3:
@@ -353,7 +439,13 @@ if __name__ == "__main__":
     v_angulaire = int(sys.argv[2])
 
     """ Taille du graphe """
-    N=20   
+    N=15   
     
-    main(N, v_robot, v_angulaire)
-    main(N, v_angulaire, v_robot)
+    #main(N, v_robot, v_angulaire)
+    #main(N, v_angulaire, v_robot)
+    
+    """calcul temps"""
+    time_graph(v_robot,v_angulaire)
+    
+    graph_dechets(N,v_robot, v_angulaire,7)
+
